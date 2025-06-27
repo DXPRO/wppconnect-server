@@ -1,4 +1,11 @@
-#!/usr/bin/env sh
+#!/bin/sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-yarn test && yarn lint
+if command -v yarn >/dev/null 2>&1; then
+  yarn run lint || exit 1
+elif command -v npm >/dev/null 2>&1; then
+  npm run lint || exit 1
+else
+  echo "Nenhum gerenciador de pacotes encontrado (yarn ou npm). Instale um deles para rodar os scripts de validação."
+  exit 1
+fi

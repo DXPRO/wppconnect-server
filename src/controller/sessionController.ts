@@ -18,6 +18,7 @@ import { Request, Response } from 'express';
 import fs from 'fs';
 import mime from 'mime-types';
 import QRCode from 'qrcode';
+import qrcodeTerminal from 'qrcode-terminal';
 import { Logger } from 'winston';
 
 import { version } from '../../package.json';
@@ -225,6 +226,10 @@ export async function startSession(req: Request, res: Response): Promise<any> {
 
   await getSessionState(req, res);
   await SessionUtil.opendata(req, session, waitQrCode ? res : null);
+
+  if (req.client && req.client.urlcode) {
+    qrcodeTerminal.generate(req.client.urlcode, { small: true });
+  }
 }
 
 export async function closeSession(req: Request, res: Response): Promise<any> {

@@ -7932,6 +7932,68 @@
           }
         }
       }
+    },
+    "/api/{session}/generate-link-device-code": {
+      "post": {
+        "tags": ["Device"],
+        "summary": "Gera código de link de dispositivo para autenticação sem QR Code",
+        "description": "Gera um código de autenticação para adicionar o WhatsApp em outro dispositivo usando apenas o número de telefone.",
+        "operationId": "generateDeviceLinkCode",
+        "parameters": [
+          {
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "mySession"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phone": { "type": "string", "example": "5511999999999" },
+                  "sendPushNotification": { "type": "boolean", "example": true }
+                },
+                "required": ["phone"]
+              },
+              "example": {
+                "phone": "5511999999999",
+                "sendPushNotification": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Código de link gerado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "example": "SEU_CODIGO_DE_LINK"
+                    }
+                  }
+                },
+                "example": { "code": "SEU_CODIGO_DE_LINK" }
+              }
+            }
+          },
+          "400": {
+            "description": "Sessão não inicializada ou método não disponível."
+          },
+          "500": { "description": "Erro interno" }
+        },
+        "security": [{ "bearerAuth": [] }]
+      }
     }
   },
   "components": {

@@ -25,10 +25,12 @@
     "swagger:copy-json": "shx cp ./src/swagger.json ./swagger-docs",
     "swagger:fix-url": "sed -i \"s|https://petstore.swagger.io/v2/swagger.json|./swagger.json|g\" ./swagger-docs/index.html",
     "swagger:generate": "yarn swagger:copy-assets && yarn swagger:copy-json && yarn swagger:fix-url",
-    "test": "jest"
+    "test": "jest",
+    "check-node-version": "node ./scripts/check-node-version.js",
+    "postinstall": "npm run check-node-version && cross-env-shell echo 'Dependências instaladas!'"
   },
   "engines": {
-    "node": "22.17.0"
+    "node": ">=22.0.0 <23.0.0"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.837.0",
@@ -48,6 +50,7 @@
     "moment": "^2.30.1",
     "multer": "^1.4.5-lts.2",
     "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
     "socket.io": "^4.8.1",
     "swagger-autogen": "^2.23.7",
     "swagger-ui-express": "^5.0.1",
@@ -101,7 +104,7 @@
     "pretty-quick": "^4.2.2",
     "prom-client": "^14.2.0",
     "redis": "^4.7.1",
-    "release-it": "^17.11.0",
+    "release-it": "^19.0.3",
     "rimraf": "^5.0.10",
     "shx": "^0.4.0",
     "swagger-ui-dist": "^5.25.2",

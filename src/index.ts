@@ -20,6 +20,7 @@ import express, { Express, NextFunction, Router } from 'express';
 import boolParser from 'express-query-boolean';
 import { createServer } from 'http';
 import mergeDeep from 'merge-deep';
+import net from 'net';
 import process from 'process';
 import { Server as Socket } from 'socket.io';
 import { Logger } from 'winston';
@@ -29,22 +30,45 @@ import config from './config';
 import { convert } from './mapper/index';
 import routes from './routes';
 import { ServerOptions } from './types/ServerOptions';
+import CreateSessionUtil from './util/createSessionUtil';
 import {
   createFolders,
   setMaxListners,
   startAllSessions,
 } from './util/functions';
 import { createLogger } from './util/logger';
+import * as sessionManager from './util/sessionManager';
 
 //require('dotenv').config();
 
 export const logger = createLogger(config.log);
 
-export function initServer(serverOptions: Partial<ServerOptions>): {
-  app: Express;
-  routes: Router;
-  logger: Logger;
-} {
+// Função para encontrar uma porta livre automaticamente
+async function getAvailablePort(
+  startPort: number,
+  maxAttempts = 20
+): Promise<number> {
+  let port = startPort;
+  for (let i = 0; i < maxAttempts; i++) {
+    const isFree = await new Promise((resolve) => {
+      const tester = net
+        .createServer()
+        .once('error', () => resolve(false))
+        .once('listening', function () {
+          tester.close();
+          resolve(true);
+        })
+        .listen(port);
+    });
+    if (isFree) return port;
+    port++;
+  }
+  throw new Error('Não foi possível encontrar uma porta livre.');
+}
+
+export async function initServer(
+  serverOptions: Partial<ServerOptions>
+): Promise<{ app: Express; routes: Router; logger: Logger }> {
   if (typeof serverOptions !== 'object') {
     serverOptions = {};
   }
@@ -57,7 +81,10 @@ export function initServer(serverOptions: Partial<ServerOptions>): {
   setMaxListners(serverOptions as ServerOptions);
 
   const app = express();
-  const PORT = process.env.PORT || serverOptions.port;
+  let PORT = Number(process.env.PORT) || Number(serverOptions.port);
+  PORT = await getAvailablePort(PORT);
+  serverOptions.port = PORT;
+  config.port = PORT;
 
   app.use(cors());
   app.use(express.json({ limit: '50mb' }));
@@ -116,7 +143,7 @@ export function initServer(serverOptions: Partial<ServerOptions>): {
     });
   });
 
-  http.listen(PORT, () => {
+  http.listen(PORT, async () => {
     logger.info(`Server is running on port: ${PORT}`);
     logger.info(
       `\x1b[31m Visit ${serverOptions.host}:${PORT}/api-docs for Swagger docs`
@@ -124,6 +151,23 @@ export function initServer(serverOptions: Partial<ServerOptions>): {
     logger.info(`WPPConnect-Server version: ${version}`);
 
     if (serverOptions.startAllSession) startAllSessions(serverOptions, logger);
+
+    // Limpar sessão antes de iniciar para garantir exibição do QR Code
+    const sessionName = 'mySession';
+    sessionManager.removeSession(sessionName);
+    const SessionUtil = new CreateSessionUtil();
+    const req: any = {
+      serverOptions,
+      logger,
+      io,
+      body: {},
+      client: undefined,
+      headers: {},
+      params: { session: sessionName },
+      query: {},
+      res: undefined,
+    };
+    await SessionUtil.opendata(req, sessionName);
   });
 
   if (config.log.level === 'error' || config.log.level === 'warn') {

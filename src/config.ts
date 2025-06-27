@@ -1,3 +1,5 @@
+import puppeteer from 'puppeteer';
+
 import { ServerOptions } from './types/ServerOptions';
 
 export default {
@@ -69,6 +71,7 @@ export default {
       '--ignore-ssl-errors',
       '--ignore-certificate-errors-spki-list',
     ],
+    executablePath: puppeteer.executablePath(),
     /**
      * Example of configuring the linkPreview generator
      * If you set this to 'null', it will use global servers; however, you have the option to define your own server

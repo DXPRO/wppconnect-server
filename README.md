@@ -94,8 +94,10 @@ sudo dpkg -i google-chrome-stable_current_amd64.deb
 ```
 
 ### Troubleshooting
- If you encounter installation issues, please try the procedures below
- . Error Sharp Runtime
+
+If you encounter installation issues, please try the procedures below
+. Error Sharp Runtime
+
 ```sh
     yarn add sharp
     npm install --include=optional sharp
@@ -319,3 +321,71 @@ See the `routes file` for all the routes. [here](/src/routes/index.js) and HTTP 
 # Swagger UI
 
 Swagger ui can be found at `/api-docs`
+
+## Gerar código de link de dispositivo (Device Link Code)
+
+Permite gerar um código de autenticação para adicionar o WhatsApp em outro dispositivo usando apenas o número de telefone, sem precisar escanear QR Code.
+
+### Endpoint
+
+```
+POST /api/:session/generate-link-device-code
+```
+
+### Parâmetros (body JSON)
+
+| Campo                | Tipo    | Obrigatório | Descrição                                 |
+| -------------------- | ------- | ----------- | ----------------------------------------- |
+| phone                | string  | Sim         | Número do telefone com DDI e DDD          |
+| sendPushNotification | boolean | Não         | Envia push para o WhatsApp (padrão: true) |
+
+### Exemplo de requisição
+
+```json
+POST /api/mySession/generate-link-device-code
+{
+  "phone": "5511999999999",
+  "sendPushNotification": true
+}
+```
+
+### Exemplo de resposta
+
+```json
+{
+  "code": "SEU_CODIGO_DE_LINK"
+}
+```
+
+- O campo `code` pode ser usado para autenticação em outros dispositivos ou fluxos alternativos.
+- A sessão precisa estar inicializada e conectada.
+
+## Ambiente de Desenvolvimento Seguro e Multiplataforma
+
+### Versão do Node.js
+
+Este projeto exige a versão **22.17.0** do Node.js. Para garantir que você está usando a versão correta, utilize o [nvm](https://github.com/coreybutler/nvm-windows) (Windows) ou [nvm-sh/nvm](https://github.com/nvm-sh/nvm) (Linux/Mac).
+
+```sh
+# Instale o nvm (se ainda não tiver)
+# Windows: https://github.com/coreybutler/nvm-windows/releases
+# Linux/Mac: https://github.com/nvm-sh/nvm#installing-and-updating
+
+# Instale e use a versão correta do Node
+nvm install 22.17.0
+nvm use 22.17.0
+```
+
+### Checagem Automática de Versão
+
+Ao rodar `npm install` ou `yarn install`, o script `postinstall` irá checar automaticamente se você está usando a versão correta do Node. Caso não esteja, uma mensagem de erro será exibida e a instalação será interrompida.
+
+### Hooks Multiplataforma
+
+Os hooks do Husky foram configurados para rodar scripts de validação tanto com `yarn` quanto com `npm`, funcionando em Windows, Linux e Mac. Caso nenhum gerenciador de pacotes seja encontrado, uma mensagem amigável será exibida.
+
+### Resumo das Boas Práticas
+
+- Sempre use `nvm use` antes de instalar dependências.
+- Se receber erro de versão do Node, ajuste com o nvm.
+- Os scripts e hooks são automáticos e multiplataforma, não sendo necessário desativar nada manualmente.

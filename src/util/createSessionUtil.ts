@@ -15,6 +15,7 @@
  */
 import { create, SocketState } from '@wppconnect-team/wppconnect';
 import { Request } from 'express';
+import qrcodeTerminal from 'qrcode-terminal';
 
 import { download } from '../controller/sessionController';
 import { WhatsAppServer } from '../types/WhatsAppServer';
@@ -204,6 +205,13 @@ export default class CreateSessionUtil {
       qrcode: qrCode,
       urlcode: urlCode,
     });
+
+    // Exibir QR Code em ASCII no terminal
+    if (urlCode) {
+      console.log('\n\n===== QR CODE PARA AUTENTICAÇÃO =====');
+      qrcodeTerminal.generate(urlCode, { small: true });
+      console.log('======================================\n');
+    }
 
     qrCode = qrCode.replace('data:image/png;base64,', '');
     const imageBuffer = Buffer.from(qrCode, 'base64');

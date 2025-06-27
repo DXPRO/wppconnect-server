@@ -2344,3 +2344,24 @@ export async function getPlatformFromMessage(req: Request, res: Response) {
     });
   }
 }
+
+export async function generateDeviceLinkCode(req: Request, res: Response) {
+  try {
+    const { phone, sendPushNotification = true } = req.body;
+    if (
+      !req.client ||
+      typeof (req.client as any).genLinkDeviceCodeForPhoneNumber !== 'function'
+    ) {
+      return res
+        .status(400)
+        .json({ error: 'Sessão não inicializada ou método não disponível.' });
+    }
+    const code = await (req.client as any).genLinkDeviceCodeForPhoneNumber(
+      phone,
+      sendPushNotification
+    );
+    res.status(200).json({ code });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}

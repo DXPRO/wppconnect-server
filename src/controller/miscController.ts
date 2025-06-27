@@ -20,6 +20,7 @@ import fs from 'fs';
 import { logger } from '..';
 import config from '../config';
 import { backupSessions, restoreSessions } from '../util/manageSession';
+import * as sessionManager from '../util/sessionManager';
 import { clientsArray } from '../util/sessionUtil';
 
 export async function backupAllSessions(req: Request, res: Response) {
@@ -229,5 +230,55 @@ export async function setLimit(req: Request, res: Response) {
       message: 'Error on set limit',
       error: error,
     });
+  }
+}
+
+// Listar sessões
+export async function listAllSessions(req, res) {
+  try {
+    const sessions = sessionManager.listSessions();
+    res.status(200).json({ sessions });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao listar sessões', details: error });
+  }
+}
+
+// Remover uma sessão
+export async function removeSessionByName(req, res) {
+  try {
+    const { session } = req.params;
+    sessionManager.removeSession(session);
+    res
+      .status(200)
+      .json({ success: true, message: `Sessão ${session} removida.` });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao remover sessão', details: error });
+  }
+}
+
+// Remover todas as sessões
+export async function removeAllSessionsHandler(req, res) {
+  try {
+    sessionManager.removeAllSessions();
+    res
+      .status(200)
+      .json({ success: true, message: 'Todas as sessões removidas.' });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: 'Erro ao remover todas as sessões', details: error });
+  }
+}
+
+// Criar pasta de sessão
+export async function createSessionFolderHandler(req, res) {
+  try {
+    const { session } = req.params;
+    const path = sessionManager.createSessionFolder(session);
+    res.status(200).json({ success: true, path });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: 'Erro ao criar pasta da sessão', details: error });
   }
 }

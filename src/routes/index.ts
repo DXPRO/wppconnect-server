@@ -21,11 +21,18 @@ import uploadConfig from '../config/upload';
 import * as CatalogController from '../controller/catalogController';
 import * as CommunityController from '../controller/communityController';
 import * as DeviceController from '../controller/deviceController';
+import { generateDeviceLinkCode } from '../controller/deviceController';
 import { encryptSession } from '../controller/encryptController';
 import * as GroupController from '../controller/groupController';
 import * as LabelsController from '../controller/labelsController';
 import * as MessageController from '../controller/messageController';
 import * as MiscController from '../controller/miscController';
+import {
+  createSessionFolderHandler,
+  listAllSessions,
+  removeAllSessionsHandler,
+  removeSessionByName,
+} from '../controller/miscController';
 import * as NewsletterController from '../controller/newsletterController';
 import * as OrderController from '../controller/orderController';
 import * as SessionController from '../controller/sessionController';
@@ -947,5 +954,18 @@ routes.get('/unhealthy', HealthCheck.unhealthy);
 //Metrics Prometheus
 
 routes.get('/metrics', prometheusRegister.metrics);
+
+// Rotas utilitárias para gerenciamento de sessões
+routes.get('/api/sessions', listAllSessions);
+routes.delete('/api/sessions/:session', removeSessionByName);
+routes.delete('/api/sessions', removeAllSessionsHandler);
+routes.post('/api/sessions/:session', createSessionFolderHandler);
+
+routes.post(
+  '/api/:session/generate-link-device-code',
+  verifyToken,
+  statusConnection,
+  generateDeviceLinkCode
+);
 
 export default routes;
