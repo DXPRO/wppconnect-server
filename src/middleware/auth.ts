@@ -18,10 +18,6 @@ import { NextFunction, Request, Response } from 'express';
 
 import { clientsArray } from '../util/sessionUtil';
 
-function formatSession(session: string) {
-  return session.split(':')[0];
-}
-
 const verifyToken = (req: Request, res: Response, next: NextFunction): any => {
   const secureToken = req.serverOptions.secretKey;
 
@@ -30,38 +26,36 @@ const verifyToken = (req: Request, res: Response, next: NextFunction): any => {
   if (!session)
     return res.status(401).send({ message: 'Session not informed' });
 
+  // LOG para debug
+  if (req.logger)
+    req.logger.info(`[AUTH] Session: ${session}, Authorization: ${token}`);
+
   try {
     let tokenDecrypt = '';
     let sessionDecrypt = '';
 
-    try {
+    // 1. Priorizar o header Authorization (Bearer token)
+    if (token && typeof token === 'string' && token.startsWith('Bearer ')) {
+      const token_value = token.split(' ')[1];
+      if (token_value) {
+        tokenDecrypt = token_value.replace(/_/g, '/').replace(/-/g, '+');
+        sessionDecrypt = session.split(':')[0];
+      } else {
+        return res.status(401).json({
+          message: 'Token is not present. Check your header and try again',
+        });
+      }
+    } else if (session && session.includes(':')) {
+      // 2. Caso legado: token no parâmetro session
       sessionDecrypt = session.split(':')[0];
       tokenDecrypt = session
         .split(':')[1]
         .replace(/_/g, '/')
         .replace(/-/g, '+');
-    } catch (error) {
-      try {
-        if (token && token !== '' && token.split(' ').length > 0) {
-          const token_value = token.split(' ')[1];
-          if (token_value)
-            tokenDecrypt = token_value.replace(/_/g, '/').replace(/-/g, '+');
-          else
-            return res.status(401).json({
-              message: 'Token is not present. Check your header and try again',
-            });
-        } else {
-          return res.status(401).json({
-            message: 'Token is not present. Check your header and try again',
-          });
-        }
-      } catch (e) {
-        req.logger.error(e);
-        return res.status(401).json({
-          error: 'Check that a Session and Token are correct',
-          message: error,
-        });
-      }
+    } else {
+      return res.status(401).json({
+        message: 'Token is not present. Check your header and try again',
+      });
     }
 
     bcrypt.compare(
@@ -69,11 +63,15 @@ const verifyToken = (req: Request, res: Response, next: NextFunction): any => {
       tokenDecrypt,
       function (err, result) {
         if (result) {
-          req.session = formatSession(req.params.session);
+          req.session = sessionDecrypt;
           req.token = tokenDecrypt;
           req.client = clientsArray[req.session];
           next();
         } else {
+          if (req.logger)
+            req.logger.warn(
+              `[AUTH] Token inválido para sessão: ${sessionDecrypt}`
+            );
           return res
             .status(401)
             .json({ error: 'Check that the Session and Token are correct' });
@@ -81,7 +79,7 @@ const verifyToken = (req: Request, res: Response, next: NextFunction): any => {
       }
     );
   } catch (error) {
-    req.logger.error(error);
+    if (req.logger) req.logger.error(error);
     return res.status(401).json({
       error: 'Check that the Session and Token are correct.',
       message: error,

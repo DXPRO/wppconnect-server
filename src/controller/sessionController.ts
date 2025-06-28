@@ -13,7 +13,7 @@
  * See the License for the specific language governing permclearSessionissions and
  * limitations under the License.
  */
-import { Message, Whatsapp } from '@wppconnect-team/wppconnect';
+// import { Message, Whatsapp } from '@wppconnect-team/wppconnect';
 import { Request, Response } from 'express';
 import fs from 'fs';
 import mime from 'mime-types';
@@ -23,18 +23,13 @@ import { Logger } from 'winston';
 
 import { version } from '../../package.json';
 import config from '../config';
-import CreateSessionUtil from '../util/createSessionUtil';
 import { callWebHook, contactToArray } from '../util/functions';
 import getAllTokens from '../util/getAllTokens';
 import { clientsArray, deleteSessionOnArray } from '../util/sessionUtil';
 
-const SessionUtil = new CreateSessionUtil();
+// const SessionUtil = new CreateSessionUtil();
 
-async function downloadFileFunction(
-  message: Message,
-  client: Whatsapp,
-  logger: Logger
-) {
+async function downloadFileFunction(message: any, client: any, logger: Logger) {
   try {
     const buffer = await client.decryptFile(message);
 
@@ -137,9 +132,10 @@ export async function startAllSessions(
     });
   }
 
-  allSessions.map(async (session: string) => {
-    const util = new CreateSessionUtil();
-    await util.opendata(req, session);
+  allSessions.map(async () => {
+    // const util = new CreateSessionUtil();
+    // await util.opendata(req, session);
+    // TODO: Migrar para WA-JS
   });
 
   return await res
@@ -221,11 +217,10 @@ export async function startSession(req: Request, res: Response): Promise<any> {
       }
      }
    */
-  const session = req.session;
-  const { waitQrCode = false } = req.body;
-
   await getSessionState(req, res);
-  await SessionUtil.opendata(req, session, waitQrCode ? res : null);
+  // const util = new CreateSessionUtil();
+  // await util.opendata(req, session, waitQrCode ? res : null);
+  // TODO: Migrar para WA-JS
 
   if (req.client && req.client.urlcode) {
     qrcodeTerminal.generate(req.client.urlcode, { small: true });
@@ -246,14 +241,22 @@ export async function closeSession(req: Request, res: Response): Promise<any> {
    */
   const session = req.session;
   try {
-    if ((clientsArray as any)[session].status === null) {
+    if (
+      !clientsArray[session] ||
+      (clientsArray[session] as any).status === null
+    ) {
       return await res
         .status(200)
         .json({ status: true, message: 'Session successfully closed' });
     } else {
       (clientsArray as any)[session] = { status: null };
 
-      await req.client.close();
+      if (req.client && typeof req.client.close === 'function') {
+        await req.client.close();
+      } else if (req.client && typeof req.client.logout === 'function') {
+        await req.client.logout();
+      }
+
       req.io.emit('whatsapp-status', false);
       callWebHook(req.client, req, 'closesession', {
         message: `Session: ${session} disconnected`,
@@ -287,7 +290,9 @@ export async function logOutSession(req: Request, res: Response): Promise<any> {
    */
   try {
     const session = req.session;
-    await req.client.logout();
+    if (req.client && typeof req.client.logout === 'function') {
+      await req.client.logout();
+    }
     deleteSessionOnArray(req.session);
 
     setTimeout(async () => {
@@ -348,9 +353,12 @@ export async function checkConnectionSession(
      }
    */
   try {
-    await req.client.isConnected();
-
-    res.status(200).json({ status: true, message: 'Connected' });
+    if (req.client && typeof req.client.isConnected === 'function') {
+      await req.client.isConnected();
+      res.status(200).json({ status: true, message: 'Connected' });
+    } else {
+      res.status(200).json({ status: false, message: 'Disconnected' });
+    }
   } catch (error) {
     res.status(200).json({ status: false, message: 'Disconnected' });
   }

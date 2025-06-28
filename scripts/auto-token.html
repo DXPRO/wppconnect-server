@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WPPConnect - Auto Token Generator</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .container {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        max-width: 600px;
+        width: 100%;
+      }
+      h1 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #555;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+        box-sizing: border-box;
+      }
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+      .button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        width: 100%;
+        margin: 10px 0;
+        transition: transform 0.2s;
+      }
+      .button:hover {
+        transform: translateY(-2px);
+      }
+      .button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .result {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        display: none;
+      }
+      .success {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+      }
+      .error {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+      }
+      .token-display {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: monospace;
+        margin: 10px 0;
+        word-break: break-all;
+      }
+      .loading {
+        text-align: center;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔐 WPPConnect Auto Token Generator</h1>
+
+      <form id="tokenForm">
+        <div class="form-group">
+          <label for="session">Nome da Sessão:</label>
+          <input type="text" id="session" value="NERDWHATS_AMERICA" required />
+        </div>
+
+        <div class="form-group">
+          <label for="secretKey">Secret Key:</label>
+          <input
+            type="text"
+            id="secretKey"
+            value="THISISMYSECURETOKEN"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="serverUrl">URL do Servidor:</label>
+          <input
+            type="text"
+            id="serverUrl"
+            value="http://localhost:21470"
+            required
+          />
+        </div>
+
+        <button type="submit" class="button" id="generateBtn">
+          🚀 Gerar e Aplicar Token Automaticamente
+        </button>
+      </form>
+
+      <div id="result" class="result"></div>
+    </div>
+
+    <script>
+      document
+        .getElementById('tokenForm')
+        .addEventListener('submit', async function (e) {
+          e.preventDefault();
+
+          const session = document.getElementById('session').value;
+          const secretKey = document.getElementById('secretKey').value;
+          const serverUrl = document.getElementById('serverUrl').value;
+          const generateBtn = document.getElementById('generateBtn');
+          const result = document.getElementById('result');
+
+          // Mostrar loading
+          generateBtn.disabled = true;
+          generateBtn.textContent = '⏳ Gerando token...';
+          result.style.display = 'none';
+
+          try {
+            // Gerar token
+            const response = await fetch(
+              `${serverUrl}/api/${session}/${secretKey}/generate-token`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+              // Aplicar token automaticamente
+              const applyUrl = `${serverUrl}/api/${session}/${secretKey}/apply-token`;
+
+              // Abrir em nova janela para aplicar o token
+              const newWindow = window.open(
+                applyUrl,
+                '_blank',
+                'width=800,height=600'
+              );
+
+              // Mostrar resultado
+              result.className = 'result success';
+              result.innerHTML = `
+                        <h3>✅ Token Gerado com Sucesso!</h3>
+                        <p><strong>Sessão:</strong> ${data.session}</p>
+                        <p><strong>Token:</strong></p>
+                        <div class="token-display">${data.token}</div>
+                        <p><strong>Token Completo:</strong></p>
+                        <div class="token-display">${data.full}</div>
+                        <p>📋 <strong>Próximos passos:</strong></p>
+                        <ul>
+                            <li>Uma nova janela foi aberta para aplicar o token automaticamente</li>
+                            <li>Se a janela não abriu, clique no botão abaixo</li>
+                            <li>Após aplicar o token, você pode usar todas as rotas protegidas</li>
+                        </ul>
+                        <button class="button" onclick="window.open('${applyUrl}', '_blank')">
+                            🔗 Abrir Aplicador de Token
+                        </button>
+                        <button class="button" onclick="window.open('${serverUrl}/api-docs', '_blank')">
+                            📖 Abrir Swagger UI
+                        </button>
+                    `;
+              result.style.display = 'block';
+
+              // Armazenar token no localStorage
+              localStorage.setItem('wppconnect_token', data.token);
+              localStorage.setItem('wppconnect_session', data.session);
+              localStorage.setItem('wppconnect_server_url', serverUrl);
+            } else {
+              throw new Error(data.message || 'Erro ao gerar token');
+            }
+          } catch (error) {
+            result.className = 'result error';
+            result.innerHTML = `
+                    <h3>❌ Erro ao Gerar Token</h3>
+                    <p><strong>Erro:</strong> ${error.message}</p>
+                    <p>Verifique se:</p>
+                    <ul>
+                        <li>O servidor está rodando em ${serverUrl}</li>
+                        <li>O Secret Key está correto</li>
+                        <li>O nome da sessão está correto</li>
+                    </ul>
+                `;
+            result.style.display = 'block';
+          } finally {
+            generateBtn.disabled = false;
+            generateBtn.textContent =
+              '🚀 Gerar e Aplicar Token Automaticamente';
+          }
+        });
+
+      // Carregar valores salvos
+      window.addEventListener('load', function () {
+        const savedToken = localStorage.getItem('wppconnect_token');
+        const savedSession = localStorage.getItem('wppconnect_session');
+        const savedServerUrl = localStorage.getItem('wppconnect_server_url');
+
+        if (savedSession)
+          document.getElementById('session').value = savedSession;
+        if (savedServerUrl)
+          document.getElementById('serverUrl').value = savedServerUrl;
+
+        if (savedToken) {
+          const result = document.getElementById('result');
+          result.className = 'result success';
+          result.innerHTML = `
+                    <h3>🔑 Token Já Disponível</h3>
+                    <p>Você já tem um token salvo para a sessão <strong>${savedSession}</strong></p>
+                    <p><strong>Token:</strong></p>
+                    <div class="token-display">${savedToken}</div>
+                    <button class="button" onclick="window.open('${savedServerUrl}/api-docs', '_blank')">
+                        📖 Abrir Swagger UI
+                    </button>
+                `;
+          result.style.display = 'block';
+        }
+      });
+    </script>
+  </body>
+</html>

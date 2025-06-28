@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Whatsapp } from '@wppconnect-team/wppconnect';
+// import { Whatsapp } from '@wppconnect-team/wppconnect';
 import { EventEmitter } from 'events';
+
+import { WhatsAppServer } from '../types/WhatsAppServer';
 
 export const chromiumArgs = [
   '--disable-web-security', // Disables web security
@@ -39,12 +41,12 @@ export const chromiumArgs = [
   '--ignore-certificate-errors-spki-list', // Ignores certificate errors in SPKI list
 ];
 // eslint-disable-next-line prefer-const
-export let clientsArray: Whatsapp[] = [];
+export let clientsArray: { [key: string]: WhatsAppServer | any } = {};
 export const sessions = [];
 export const eventEmitter = new EventEmitter();
 
 export function deleteSessionOnArray(session: string): void {
-  const newArray = clientsArray;
-  delete clientsArray[session];
-  clientsArray = newArray;
+  if (clientsArray[session]) {
+    delete clientsArray[session];
+  }
 }

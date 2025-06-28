@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Chat } from '@wppconnect-team/wppconnect';
+// import { Chat } from '@wppconnect-team/wppconnect';
 import { Request, Response } from 'express';
 
 import { contactToArray, unlinkAsync } from '../util/functions';
@@ -387,7 +387,7 @@ export async function getChatById(req: Request, res: Response) {
   const { isGroup } = req.query;
 
   try {
-    let result = {} as Chat;
+    let result = {} as any;
     if (isGroup) {
       result = await req.client.getChatById(`${phone}@g.us`);
     } else {
@@ -2248,7 +2248,7 @@ export async function chatWoot(req: Request, res: Response): Promise<any> {
    */
   const { session } = req.params;
   const client: any = clientsArray[session];
-  if (client == null || client.status !== 'CONNECTED') return;
+  if (!client || client.status !== 'CONNECTED') return;
   try {
     if (await client.isConnected()) {
       const event = req.body.event;

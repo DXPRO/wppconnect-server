@@ -124,8 +124,15 @@ export async function takeScreenshot(req: Request, res: Response) {
   */
 
   try {
-    const result = await req.client.takeScreenshot();
-    res.status(200).json(result);
+    if (req.client && typeof req.client.takeScreenshot === 'function') {
+      const result = await req.client.takeScreenshot();
+      res.status(200).json(result);
+    } else {
+      res.status(400).json({
+        status: false,
+        message: 'Client not available or method not supported',
+      });
+    }
   } catch (error: any) {
     res.status(500).json({
       status: false,
@@ -159,7 +166,9 @@ export async function clearSessionData(req: Request, res: Response) {
     }
     if (req?.client?.page) {
       delete clientsArray[req.params.session];
-      await req.client.logout();
+      if (typeof req.client.logout === 'function') {
+        await req.client.logout();
+      }
     }
     const path = config.customUserDataDir + session;
     const pathToken = __dirname + `../../../tokens/${session}.data.json`;
@@ -222,8 +231,15 @@ export async function setLimit(req: Request, res: Response) {
     const { type, value } = req.body;
     if (!type || !value) throw new Error('Send de type and value');
 
-    const result = await req.client.setLimit(type, value);
-    res.status(200).json(result);
+    if (req.client && typeof req.client.setLimit === 'function') {
+      const result = await req.client.setLimit(type, value);
+      res.status(200).json(result);
+    } else {
+      res.status(400).json({
+        status: false,
+        message: 'Client not available or method not supported',
+      });
+    }
   } catch (error: any) {
     res.status(500).json({
       status: false,

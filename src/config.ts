@@ -13,7 +13,7 @@ export default {
   maxListeners: 15,
   customUserDataDir: './userDataDir/',
   webhook: {
-    url: null,
+    url: 'https://whats.li/api/webhook.php?test_token=true',
     autoDownload: true,
     uploadS3: false,
     readMessage: true,

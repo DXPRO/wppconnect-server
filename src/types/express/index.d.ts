@@ -1,4 +1,4 @@
-import { Whatsapp } from '@wppconnect-team/wppconnect';
+// import { Whatsapp } from '@wppconnect-team/wppconnect';
 import { Socket } from 'socket.io';
 import { Logger } from 'winston';
 
@@ -10,7 +10,7 @@ export {};
 declare global {
   namespace Express {
     export interface Request {
-      client: Whatsapp & { urlcode: string; status: string };
+      client: any;
       logger: Logger;
       session: string;
       token?: string;

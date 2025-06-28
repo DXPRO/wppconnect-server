@@ -262,7 +262,7 @@ To generate an access token, you must use your `SECRET_KEY`.
 Using the route:
 
 ```shell
-  curl -X POST --location "http://localhost:21465/api/mySession/THISISMYSECURETOKEN/generate-token"
+  curl -X POST --location "http://localhost:21465/api/NERDWHATS_AMERICA/THISISMYSECURETOKEN/generate-token"
 ```
 
 ### Response:
@@ -270,7 +270,7 @@ Using the route:
 ```json
 {
   "status": "Success",
-  "session": "mySession",
+  "session": "NERDWHATS_AMERICA",
   "token": "$2b$10$duQ5YYV6fojn5qFiFv.aEuY32_SnHgcmxdfxohnjG4EHJ5_Z6QWhe",
   "full": "wppconnect:$2b$10$duQ5YYV6fojn5qFiFv.aEuY32_SnHgcmxdfxohnjG4EHJ5_Z6QWhe"
 }
@@ -286,7 +286,7 @@ Save the value of the "full" response. Then use this value to call the routes.
 #Starting Session
 # /api/:session/start-session
 
-curl -X POST --location "http://localhost:21465/api/mySession/start-session" \
+curl -X POST --location "http://localhost:21465/api/NERDWHATS_AMERICA/start-session" \
     -H "Accept: application/json" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer \$2b\$10\$JcHd97xHN6ErBuiLd7Yu4.r6McvOvEZZDQTQwev2MRK_zQObUZZ9C"
@@ -297,7 +297,7 @@ curl -X POST --location "http://localhost:21465/api/mySession/start-session" \
 # /api/:session/start-session
 # when the session is starting if the method is called again it will return the base64 qrCode
 
-curl -X POST --location "http://localhost:21465/api/mySession/start-session" \
+curl -X POST --location "http://localhost:21465/api/NERDWHATS_AMERICA/start-session" \
     -H "Accept: application/json" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer \$2b\$10\$JcHd97xHN6ErBuiLd7Yu4.r6McvOvEZZDQTQwev2MRK_zQObUZZ9C"
@@ -306,7 +306,7 @@ curl -X POST --location "http://localhost:21465/api/mySession/start-session" \
 ```sh
 #Send Message
 # /api/:session/send-message
-curl -X POST --location "http://localhost:21465/api/mySession/send-message" \
+curl -X POST --location "http://localhost:21465/api/NERDWHATS_AMERICA/send-message" \
     -H "Content-Type: application/json; charset=utf-8" \
     -H "Accept: application/json" \
     -H "Authorization: Bearer \$2b\$10\$8aQFQxnWREtBEMZK_iHMe.u7NeoNkjL7s6NYai_83Pb31Ycss6Igm" \
@@ -342,7 +342,7 @@ POST /api/:session/generate-link-device-code
 ### Exemplo de requisição
 
 ```json
-POST /api/mySession/generate-link-device-code
+POST /api/NERDWHATS_AMERICA/generate-link-device-code
 {
   "phone": "5511999999999",
   "sendPushNotification": true

@@ -15,8 +15,11 @@
  */
 
 import archiver from 'archiver';
+import { execSync } from 'child_process';
 import { Request } from 'express';
 import fileSystem from 'fs';
+import os from 'os';
+import path from 'path';
 import unzipper from 'unzipper';
 
 import { logger } from '..';
@@ -116,14 +119,55 @@ export async function closeAllSessions(req: Request) {
   names.forEach(async (session: string) => {
     const client = clientsArray[session];
     try {
-      delete clientsArray[session];
-      if (client?.status) {
-        logger.info('Stopping session: ' + session);
-        await client.page.browser().close();
+      if (client) {
+        delete clientsArray[session];
+        if (client.status && client.page && client.page.browser) {
+          logger.info('Stopping session: ' + session);
+          await client.page.browser().close();
+        }
       }
-      delete clientsArray[session];
     } catch (error) {
       logger.error('Not was possible stop session: ' + session);
     }
   });
+}
+
+/**
+ * Função utilitária para encerrar processos do navegador e remover a pasta da sessão travada.
+ * Compatível com Windows e Linux.
+ * @param session Nome da sessão (ex: 'NERDWHATS_AMERICA')
+ * @param userDataDir Caminho base do userDataDir (ex: './userDataDir')
+ */
+export function cleanSession(
+  session: string,
+  userDataDir: string = './userDataDir'
+) {
+  try {
+    const platform = os.platform();
+    // 1. Matar processos do navegador
+    if (platform === 'win32') {
+      // Mata todos os processos chrome.exe
+      try {
+        execSync('taskkill /IM chrome.exe /F', { stdio: 'ignore' });
+      } catch {}
+    } else {
+      // Linux/Mac: mata todos os processos chromium ou chrome
+      try {
+        execSync('pkill -f chromium', { stdio: 'ignore' });
+      } catch {}
+      try {
+        execSync('pkill -f chrome', { stdio: 'ignore' });
+      } catch {}
+    }
+    // 2. Remover pasta da sessão
+    const sessionPath = path.join(userDataDir, session);
+    if (fileSystem.existsSync(sessionPath)) {
+      fileSystem.rmSync(sessionPath, { recursive: true, force: true });
+    }
+    console.log(`[cleanSession] Sessão ${session} limpa com sucesso!`);
+    return true;
+  } catch (error) {
+    console.error(`[cleanSession] Erro ao limpar sessão ${session}:`, error);
+    return false;
+  }
 }

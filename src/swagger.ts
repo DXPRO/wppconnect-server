@@ -35,6 +35,12 @@ const doc = {
       bearerFormat: 'JWT',
     },
   },
+  // Configuração global de segurança para todas as rotas protegidas
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
   tags: [
     {
       name: 'Auth',
@@ -87,6 +93,10 @@ const doc = {
       name: 'Misc',
       description:
         'Handles miscellaneous operations that do not fit into other specific categories.',
+    },
+    {
+      name: 'WA-JS',
+      description: 'WA-JS specific operations for WhatsApp Web integration.',
     },
   ],
   definitions: {},

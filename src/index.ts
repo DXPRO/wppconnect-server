@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { defaultLogger } from '@wppconnect-team/wppconnect';
+// import { defaultLogger } from '@wppconnect-team/wppconnect';
 import cors from 'cors';
 import express, { Express, NextFunction, Router } from 'express';
 import boolParser from 'express-query-boolean';
@@ -30,14 +30,12 @@ import config from './config';
 import { convert } from './mapper/index';
 import routes from './routes';
 import { ServerOptions } from './types/ServerOptions';
-import CreateSessionUtil from './util/createSessionUtil';
 import {
   createFolders,
   setMaxListners,
   startAllSessions,
 } from './util/functions';
 import { createLogger } from './util/logger';
-import * as sessionManager from './util/sessionManager';
 
 //require('dotenv').config();
 
@@ -74,9 +72,9 @@ export async function initServer(
   }
 
   serverOptions = mergeDeep({}, config, serverOptions);
-  defaultLogger.level = serverOptions?.log?.level
-    ? serverOptions.log.level
-    : 'silly';
+  // defaultLogger.level = serverOptions?.log?.level
+  //   ? serverOptions.log.level
+  //   : 'silly';
 
   setMaxListners(serverOptions as ServerOptions);
 
@@ -151,23 +149,6 @@ export async function initServer(
     logger.info(`WPPConnect-Server version: ${version}`);
 
     if (serverOptions.startAllSession) startAllSessions(serverOptions, logger);
-
-    // Limpar sessão antes de iniciar para garantir exibição do QR Code
-    const sessionName = 'mySession';
-    sessionManager.removeSession(sessionName);
-    const SessionUtil = new CreateSessionUtil();
-    const req: any = {
-      serverOptions,
-      logger,
-      io,
-      body: {},
-      client: undefined,
-      headers: {},
-      params: { session: sessionName },
-      query: {},
-      res: undefined,
-    };
-    await SessionUtil.opendata(req, sessionName);
   });
 
   if (config.log.level === 'error' || config.log.level === 'warn') {

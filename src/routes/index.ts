@@ -21,8 +21,13 @@ import uploadConfig from '../config/upload';
 import * as CatalogController from '../controller/catalogController';
 import * as CommunityController from '../controller/communityController';
 import * as DeviceController from '../controller/deviceController';
-import { generateDeviceLinkCode } from '../controller/deviceController';
-import { encryptSession } from '../controller/encryptController';
+import {
+  applyTokenAndRedirect,
+  applyTokenAuto,
+  encryptSession,
+  generateAndApplyToken,
+  testWebhookWithToken,
+} from '../controller/encryptController';
 import * as GroupController from '../controller/groupController';
 import * as LabelsController from '../controller/labelsController';
 import * as MessageController from '../controller/messageController';
@@ -37,6 +42,7 @@ import * as NewsletterController from '../controller/newsletterController';
 import * as OrderController from '../controller/orderController';
 import * as SessionController from '../controller/sessionController';
 import * as StatusController from '../controller/statusController';
+import * as WAJsController from '../controller/waJsController';
 import verifyToken from '../middleware/auth';
 import * as HealthCheck from '../middleware/healthCheck';
 import * as prometheusRegister from '../middleware/instrumentation';
@@ -48,6 +54,21 @@ const routes: Router = Router();
 
 // Generate Token
 routes.post('/api/:session/:secretkey/generate-token', encryptSession);
+
+// Generate and Apply Token Automatically
+routes.get('/api/:session/:secretkey/apply-token', generateAndApplyToken);
+
+// Apply Token Auto (opens in new tab)
+routes.get('/api/:session/:secretkey/apply-token-auto', applyTokenAuto);
+
+// Apply Token Redirect
+routes.get(
+  '/api/:session/:secretkey/apply-token-redirect',
+  applyTokenAndRedirect
+);
+
+// Test Webhook
+routes.post('/api/:session/:secretkey/test-webhook', testWebhookWithToken);
 
 // All Sessions
 routes.get(
@@ -75,18 +96,18 @@ routes.get(
 routes.get(
   '/api/:session/qrcode-session',
   verifyToken,
-  SessionController.getQrCode
+  WAJsController.getQRCode
 );
 routes.post(
   '/api/:session/start-session',
   verifyToken,
-  SessionController.startSession
+  WAJsController.startSession
 );
 routes.post(
   '/api/:session/logout-session',
   verifyToken,
   statusConnection,
-  SessionController.logOutSession
+  WAJsController.logoutSession
 );
 routes.post(
   '/api/:session/:secretkey/clear-session-data',
@@ -95,7 +116,7 @@ routes.post(
 routes.post(
   '/api/:session/close-session',
   verifyToken,
-  SessionController.closeSession
+  WAJsController.closeSession
 );
 routes.post(
   '/api/:session/subscribe-presence',
@@ -119,13 +140,13 @@ routes.post(
   '/api/:session/send-message',
   verifyToken,
   statusConnection,
-  MessageController.sendMessage
+  WAJsController.sendMessage
 );
 routes.post(
   '/api/:session/edit-message',
   verifyToken,
   statusConnection,
-  MessageController.editMessage
+  WAJsController.editMessage
 );
 routes.post(
   '/api/:session/send-image',
@@ -159,13 +180,13 @@ routes.post(
   upload.single('file'),
   verifyToken,
   statusConnection,
-  MessageController.sendFile
+  WAJsController.sendFile
 );
 routes.post(
   '/api/:session/send-file-base64',
   verifyToken,
   statusConnection,
-  MessageController.sendFile
+  WAJsController.sendFile
 );
 routes.post(
   '/api/:session/send-voice',
@@ -244,7 +265,7 @@ routes.get(
   '/api/:session/all-groups',
   verifyToken,
   statusConnection,
-  GroupController.getAllGroups
+  WAJsController.getAllGroups
 );
 routes.get(
   '/api/:session/group-members/:groupId',
@@ -286,7 +307,7 @@ routes.post(
   '/api/:session/create-group',
   verifyToken,
   statusConnection,
-  GroupController.createGroup
+  WAJsController.createGroup
 );
 routes.post(
   '/api/:session/leave-group',
@@ -304,25 +325,25 @@ routes.post(
   '/api/:session/add-participant-group',
   verifyToken,
   statusConnection,
-  GroupController.addParticipant
+  WAJsController.addParticipant
 );
 routes.post(
   '/api/:session/remove-participant-group',
   verifyToken,
   statusConnection,
-  GroupController.removeParticipant
+  WAJsController.removeParticipant
 );
 routes.post(
   '/api/:session/promote-participant-group',
   verifyToken,
   statusConnection,
-  GroupController.promoteParticipant
+  WAJsController.promoteParticipant
 );
 routes.post(
   '/api/:session/demote-participant-group',
   verifyToken,
   statusConnection,
-  GroupController.demoteParticipant
+  WAJsController.demoteParticipant
 );
 routes.post(
   '/api/:session/group-info-from-invite-link',
@@ -373,13 +394,13 @@ routes.get(
   '/api/:session/all-chats',
   verifyToken,
   statusConnection,
-  DeviceController.getAllChats
+  WAJsController.listAllChats
 );
 routes.post(
   '/api/:session/list-chats',
   verifyToken,
   statusConnection,
-  DeviceController.listChats
+  WAJsController.listAllChats
 );
 
 routes.get(
@@ -416,7 +437,7 @@ routes.get(
   '/api/:session/all-unread-messages',
   verifyToken,
   statusConnection,
-  DeviceController.getAllUnreadMessages
+  WAJsController.getAllUnreadMessages
 );
 routes.get(
   '/api/:session/chat-by-id/:phone',
@@ -501,7 +522,7 @@ routes.post(
   '/api/:session/delete-message',
   verifyToken,
   statusConnection,
-  DeviceController.deleteMessage
+  WAJsController.deleteMessage
 );
 routes.post(
   '/api/:session/react-message',
@@ -751,13 +772,13 @@ routes.get(
   '/api/:session/all-contacts',
   verifyToken,
   statusConnection,
-  DeviceController.getAllContacts
+  WAJsController.getAllContacts
 );
 routes.get(
   '/api/:session/contact/:phone',
   verifyToken,
   statusConnection,
-  DeviceController.getContact
+  WAJsController.getContactDetailsByPhone
 );
 routes.get(
   '/api/:session/profile/:phone',
@@ -789,13 +810,13 @@ routes.post(
   '/api/:session/block-contact',
   verifyToken,
   statusConnection,
-  DeviceController.blockContact
+  WAJsController.blockContact
 );
 routes.post(
   '/api/:session/unblock-contact',
   verifyToken,
   statusConnection,
-  DeviceController.unblockContact
+  WAJsController.unblockContact
 );
 
 // Device
@@ -943,6 +964,13 @@ routes.post(
 
 routes.post('/api/:session/chatwoot', DeviceController.chatWoot);
 
+// Link Device Code
+routes.post(
+  '/api/:session/generate-link-device-code',
+  verifyToken,
+  WAJsController.generateLinkDeviceCode
+);
+
 // Api Doc
 routes.use('/api-docs', swaggerUi.serve as any);
 routes.get('/api-docs', swaggerUi.setup(swaggerDocument) as any);
@@ -961,11 +989,78 @@ routes.delete('/api/sessions/:session', removeSessionByName);
 routes.delete('/api/sessions', removeAllSessionsHandler);
 routes.post('/api/sessions/:session', createSessionFolderHandler);
 
-routes.post(
-  '/api/:session/generate-link-device-code',
+// ROTAS WA-JS PARA TESTE NO SWAGGER
+routes.get(
+  '/api/:session/list-chats',
   verifyToken,
   statusConnection,
-  generateDeviceLinkCode
+  WAJsController.listAllChats
+);
+routes.get(
+  '/api/:session/get-chat',
+  verifyToken,
+  statusConnection,
+  WAJsController.getChatDetails
+);
+routes.get(
+  '/api/:session/all-contacts',
+  verifyToken,
+  statusConnection,
+  WAJsController.getAllContacts
+);
+routes.get(
+  '/api/:session/get-contact',
+  verifyToken,
+  statusConnection,
+  WAJsController.getContactDetails
+);
+routes.post(
+  '/api/:session/create-group',
+  verifyToken,
+  statusConnection,
+  WAJsController.createGroup
+);
+routes.post(
+  '/api/:session/send-message',
+  verifyToken,
+  statusConnection,
+  WAJsController.sendMessage
+);
+routes.post(
+  '/api/:session/send-image',
+  verifyToken,
+  statusConnection,
+  WAJsController.sendImage
+);
+routes.post(
+  '/api/:session/delete-message',
+  verifyToken,
+  statusConnection,
+  WAJsController.deleteMessage
+);
+
+// ===== ADMINISTRAÇÃO =====
+routes.post(
+  '/api/:session/clean-session',
+  verifyToken,
+  WAJsController.cleanSession
+);
+
+routes.get(
+  '/api/:session/:secretkey/apply-token-redirect',
+  applyTokenAndRedirect
+);
+
+routes.post(
+  '/api/:session/execute-script',
+  verifyToken,
+  WAJsController.executeScriptInPage
+);
+
+routes.get(
+  '/api/:session/get-auth-code',
+  verifyToken,
+  WAJsController.getAuthCode
 );
 
 export default routes;

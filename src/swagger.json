@@ -49,13 +49,19 @@
     {
       "name": "Misc",
       "description": "Handles miscellaneous operations that do not fit into other specific categories."
+    },
+    {
+      "name": "WA-JS",
+      "description": "WA-JS specific operations for WhatsApp Web integration."
     }
   ],
   "paths": {
     "/api/{session}/{secretkey}/generate-token": {
       "post": {
         "tags": ["Auth"],
-        "description": "",
+        "summary": "Generate Bearer token for session",
+        "description": "Generates a Bearer token for the specified session. Use this token in the Authorization header for protected routes.",
+        "operationId": "encryptSession",
         "parameters": [
           {
             "name": "session",
@@ -64,7 +70,8 @@
             "schema": {
               "type": "string",
               "example": "NERDWHATS_AMERICA"
-            }
+            },
+            "description": "Session name"
           },
           {
             "name": "secretkey",
@@ -73,12 +80,443 @@
             "schema": {
               "type": "string",
               "example": "THISISMYSECURETOKEN"
+            },
+            "description": "Secret key for authentication"
+          },
+          {
+            "name": "description",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "content",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "message",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "session",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "token",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "full",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instructions",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "swagger",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "header",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "session_param",
+            "in": "header",
+            "schema": {
+              "type": "string"
             }
           }
         ],
         "responses": {
           "201": {
-            "description": "Created"
+            "description": "Token generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Token gerado e aplicado automaticamente!"
+                    },
+                    "session": {
+                      "type": "string",
+                      "example": "NERDWHATS_AMERICA"
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "$2b$10$..."
+                    },
+                    "full": {
+                      "type": "string",
+                      "example": "NERDWHATS_AMERICA:$2b$10$..."
+                    },
+                    "instructions": {
+                      "type": "object",
+                      "properties": {
+                        "curl": {
+                          "type": "string",
+                          "example": "curl -H \"Authorization: Bearer $2b$10$...\" http://localhost:21470/api/NERDWHATS_AMERICA/qrcode-session"
+                        },
+                        "swagger": {
+                          "type": "string",
+                          "example": "Use the token \"$2b$10$...\" in the Swagger Authorize button"
+                        },
+                        "header": {
+                          "type": "string",
+                          "example": "Authorization: Bearer $2b$10$..."
+                        },
+                        "session_param": {
+                          "type": "string",
+                          "example": "NERDWHATS_AMERICA:$2b$10$..."
+                        }
+                      }
+                    },
+                    "note": {
+                      "type": "string",
+                      "example": "O token foi gerado e está pronto para uso. Use-o no header Authorization ou como parâmetro de sessão."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid secret key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "The SECRET_KEY is incorrect"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/{session}/{secretkey}/apply-token": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Generate and automatically apply token",
+        "description": "Generates a Bearer token for the session and provides instructions to apply it to the Swagger UI",
+        "operationId": "generateAndApplyToken",
+        "parameters": [
+          {
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "NERDWHATS_AMERICA"
+            },
+            "description": "Session name"
+          },
+          {
+            "name": "secretkey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "THISISMYSECURETOKEN"
+            },
+            "description": "Secret key for authentication"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Token gerado com sucesso!"
+                    },
+                    "session": {
+                      "type": "string",
+                      "example": "NERDWHATS_AMERICA"
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "$2b$10$..."
+                    },
+                    "full": {
+                      "type": "string",
+                      "example": "NERDWHATS_AMERICA:$2b$10$..."
+                    },
+                    "instructions": {
+                      "type": "object",
+                      "properties": {
+                        "step1": {
+                          "type": "string",
+                          "example": "1. Clique no botão \"Authorize\" no topo da página"
+                        },
+                        "step2": {
+                          "type": "string",
+                          "example": "2. Cole o token no campo \"Value\""
+                        },
+                        "step3": {
+                          "type": "string",
+                          "example": "3. Clique em \"Authorize\""
+                        },
+                        "step4": {
+                          "type": "string",
+                          "example": "4. Clique em \"Close\""
+                        },
+                        "step5": {
+                          "type": "string",
+                          "example": "5. Agora você pode usar todas as rotas protegidas!"
+                        }
+                      }
+                    },
+                    "curl_example": {
+                      "type": "string",
+                      "example": "curl -H \"Authorization: Bearer $2b$10$...\" http://localhost:21470/api/NERDWHATS_AMERICA/qrcode-session"
+                    },
+                    "swagger_url": {
+                      "type": "string",
+                      "example": "http://localhost:21470/api-docs"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid secret key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "The SECRET_KEY is incorrect"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/{session}/{secretkey}/apply-token-auto": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Apply token automatically in popup",
+        "description": "Generates a token and shows a popup modal to apply it to the Swagger UI",
+        "operationId": "applyTokenAuto",
+        "produces": ["text/html"],
+        "parameters": [
+          {
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "NERDWHATS_AMERICA"
+            },
+            "description": "Session name"
+          },
+          {
+            "name": "secretkey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "THISISMYSECURETOKEN"
+            },
+            "description": "Secret key for authentication"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token applied automatically",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "example": "<!DOCTYPE html>..."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/{session}/{secretkey}/apply-token-redirect": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Apply token and redirect to Swagger UI",
+        "description": "Generates a token and redirects to Swagger UI with the token automatically applied",
+        "operationId": "applyTokenAndRedirect",
+        "produces": ["text/html"],
+        "parameters": [
+          {
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "NERDWHATS_AMERICA"
+            },
+            "description": "Session name"
+          },
+          {
+            "name": "secretkey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "THISISMYSECURETOKEN"
+            },
+            "description": "Secret key for authentication"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token applied and redirecting to Swagger UI",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "example": "<!DOCTYPE html>..."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/{session}/{secretkey}/test-webhook": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Test webhook with generated token",
+        "description": "Generates a token and sends it to the webhook for testing",
+        "operationId": "testWebhookWithToken",
+        "parameters": [
+          {
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "NERDWHATS_AMERICA"
+            },
+            "description": "Session name"
+          },
+          {
+            "name": "secretkey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "THISISMYSECURETOKEN"
+            },
+            "description": "Secret key for authentication"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhook test completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Webhook test completed"
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "$2b$10$..."
+                    },
+                    "webhook_url": {
+                      "type": "string",
+                      "example": "https://whats.li/api/webhook.php"
+                    },
+                    "webhook_response": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request"
@@ -206,7 +644,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "messageId"
+              "example": "NERDWHATS_AMERICA"
             }
           },
           {
@@ -277,9 +715,9 @@
     },
     "/api/{session}/qrcode-session": {
       "get": {
-        "tags": ["Auth"],
+        "tags": ["WA-JS"],
         "description": "",
-        "operationId": "getQrCode",
+        "operationId": "getQRCode",
         "parameters": [
           {
             "name": "session",
@@ -299,16 +737,12 @@
             "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/{session}/start-session": {
       "post": {
-        "tags": ["Auth"],
+        "tags": ["WA-JS"],
         "description": "",
         "operationId": "startSession",
         "parameters": [
@@ -323,43 +757,20 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "webhook": {
-                    "type": "string"
-                  },
-                  "waitQrCode": {
-                    "type": "boolean"
-                  }
-                }
-              },
-              "example": {
-                "webhook": "",
-                "waitQrCode": false
-              }
-            }
-          }
-        }
+        "security": []
       }
     },
     "/api/{session}/logout-session": {
       "post": {
-        "tags": ["Auth"],
-        "description": "This route logout and delete session data",
+        "tags": ["WA-JS"],
+        "description": "",
         "operationId": "logoutSession",
         "parameters": [
           {
@@ -376,15 +787,14 @@
           "200": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request"
+          },
           "500": {
             "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/{session}/{secretkey}/clear-session-data": {
@@ -426,7 +836,7 @@
     },
     "/api/{session}/close-session": {
       "post": {
-        "tags": ["Auth"],
+        "tags": ["WA-JS"],
         "description": "",
         "operationId": "closeSession",
         "parameters": [
@@ -444,15 +854,14 @@
           "200": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request"
+          },
           "500": {
             "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/{session}/subscribe-presence": {
@@ -512,6 +921,55 @@
         }
       }
     },
+    "/api/{session}/set-online-presence": {
+      "post": {
+        "tags": ["Misc"],
+        "description": "",
+        "operationId": "setOnlinePresence",
+        "parameters": [
+          {
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "NERDWHATS_AMERICA"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "isOnline": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "isOnline": false
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/{session}/download-media": {
       "post": {
         "tags": ["Messages"],
@@ -563,8 +1021,9 @@
     },
     "/api/{session}/send-message": {
       "post": {
-        "tags": ["Messages"],
+        "tags": ["WA-JS"],
         "description": "",
+        "operationId": "sendMessage",
         "parameters": [
           {
             "name": "session",
@@ -577,81 +1036,25 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "400": {
             "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "phone": {
-                    "type": "string"
-                  },
-                  "isGroup": {
-                    "type": "boolean"
-                  },
-                  "isNewsletter": {
-                    "type": "boolean"
-                  },
-                  "isLid": {
-                    "type": "boolean"
-                  },
-                  "message": {
-                    "type": "string"
-                  },
-                  "options": {
-                    "type": "object"
-                  }
-                }
-              },
-              "examples": {
-                "Send message to contact": {
-                  "value": {
-                    "phone": "5521999999999",
-                    "isGroup": false,
-                    "isNewsletter": false,
-                    "isLid": false,
-                    "message": "Hi from WPPConnect"
-                  }
-                },
-                "Send message with reply": {
-                  "value": {
-                    "phone": "5521999999999",
-                    "isGroup": false,
-                    "isNewsletter": false,
-                    "isLid": false,
-                    "message": "Hi from WPPConnect with reply",
-                    "options": {
-                      "quotedMsg": "true_...@c.us_3EB01DE65ACC6_out"
-                    }
-                  }
-                },
-                "Send message to group": {
-                  "value": {
-                    "phone": "8865623215244578",
-                    "isGroup": true,
-                    "message": "Hi from WPPConnect"
-                  }
-                }
-              }
-            }
-          }
-        }
+        "security": [],
+        "requestBody": {}
       }
     },
     "/api/{session}/edit-message": {
       "post": {
-        "tags": ["Messages"],
+        "tags": ["WA-JS"],
         "description": "",
+        "operationId": "editMessage",
         "parameters": [
           {
             "name": "session",
@@ -664,38 +1067,31 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "id": {
-                    "type": "string"
+                  "chatId": {
+                    "example": "any"
+                  },
+                  "messageId": {
+                    "example": "any"
                   },
                   "newText": {
-                    "type": "string"
-                  },
-                  "options": {
-                    "type": "object"
-                  }
-                }
-              },
-              "examples": {
-                "Edit a message": {
-                  "value": {
-                    "id": "true_5521999999999@c.us_3EB04FCAA1527EB6D9DEC8",
-                    "newText": "New text for message"
+                    "example": "any"
                   }
                 }
               }
@@ -706,8 +1102,9 @@
     },
     "/api/{session}/send-image": {
       "post": {
-        "tags": ["Messages"],
+        "tags": ["WA-JS"],
         "description": "",
+        "operationId": "sendImage",
         "parameters": [
           {
             "name": "session",
@@ -720,64 +1117,18 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "400": {
             "description": "Bad Request"
           },
-          "401": {
-            "description": "Unauthorized"
+          "500": {
+            "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "phone": {
-                    "type": "string"
-                  },
-                  "isGroup": {
-                    "type": "boolean"
-                  },
-                  "isNewsletter": {
-                    "type": "boolean"
-                  },
-                  "isLid": {
-                    "type": "boolean"
-                  },
-                  "filename": {
-                    "type": "string"
-                  },
-                  "caption": {
-                    "type": "string"
-                  },
-                  "base64": {
-                    "type": "string"
-                  }
-                }
-              },
-              "examples": {
-                "Default": {
-                  "value": {
-                    "phone": "5521999999999",
-                    "isGroup": false,
-                    "isNewsletter": false,
-                    "isLid": false,
-                    "filename": "file name lol",
-                    "caption": "caption for my file",
-                    "base64": "<base64> string"
-                  }
-                }
-              }
-            }
-          }
-        }
+        "security": [],
+        "requestBody": {}
       }
     },
     "/api/{session}/send-sticker": {
@@ -965,72 +1316,45 @@
     },
     "/api/{session}/send-file": {
       "post": {
-        "tags": ["Messages"],
+        "tags": ["WA-JS"],
         "description": "",
+        "operationId": "sendFile",
         "parameters": [
           {
             "name": "session",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "NERDWHATS_AMERICA"
+              "type": "string"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "400": {
             "description": "Bad Request"
           },
-          "401": {
-            "description": "Unauthorized"
+          "500": {
+            "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "phone": {
-                    "type": "string"
+                  "to": {
+                    "example": "any"
                   },
-                  "isGroup": {
-                    "type": "boolean"
-                  },
-                  "isNewsletter": {
-                    "type": "boolean"
-                  },
-                  "isLid": {
-                    "type": "boolean"
-                  },
-                  "filename": {
-                    "type": "string"
+                  "file": {
+                    "example": "any"
                   },
                   "caption": {
-                    "type": "string"
-                  },
-                  "base64": {
-                    "type": "string"
-                  }
-                }
-              },
-              "examples": {
-                "Default": {
-                  "value": {
-                    "phone": "5521999999999",
-                    "isGroup": false,
-                    "isNewsletter": false,
-                    "isLid": false,
-                    "filename": "file name lol",
-                    "caption": "caption for my file",
-                    "base64": "<base64> string"
+                    "example": "any"
                   }
                 }
               }
@@ -1041,72 +1365,45 @@
     },
     "/api/{session}/send-file-base64": {
       "post": {
-        "tags": ["Messages"],
+        "tags": ["WA-JS"],
         "description": "",
+        "operationId": "sendFile",
         "parameters": [
           {
             "name": "session",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "NERDWHATS_AMERICA"
+              "type": "string"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "400": {
             "description": "Bad Request"
           },
-          "401": {
-            "description": "Unauthorized"
+          "500": {
+            "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "phone": {
-                    "type": "string"
+                  "to": {
+                    "example": "any"
                   },
-                  "isGroup": {
-                    "type": "boolean"
-                  },
-                  "isNewsletter": {
-                    "type": "boolean"
-                  },
-                  "isLid": {
-                    "type": "boolean"
-                  },
-                  "filename": {
-                    "type": "string"
+                  "file": {
+                    "example": "any"
                   },
                   "caption": {
-                    "type": "string"
-                  },
-                  "base64": {
-                    "type": "string"
-                  }
-                }
-              },
-              "examples": {
-                "Default": {
-                  "value": {
-                    "phone": "5521999999999",
-                    "isGroup": false,
-                    "isNewsletter": false,
-                    "isLid": false,
-                    "filename": "file name lol",
-                    "caption": "caption for my file",
-                    "base64": "<base64> string"
+                    "example": "any"
                   }
                 }
               }
@@ -1235,33 +1532,22 @@
     },
     "/api/{session}/status-session": {
       "get": {
-        "tags": ["Auth"],
         "description": "",
-        "operationId": "closeSession",
         "parameters": [
           {
             "name": "session",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "NERDWHATS_AMERICA"
+              "type": "string"
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
+          "default": {
+            "description": ""
           }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        }
       }
     },
     "/api/{session}/send-status": {
@@ -1838,71 +2124,28 @@
     },
     "/api/{session}/all-groups": {
       "get": {
-        "tags": ["Group"],
-        "summary": "Deprecated in favor of ",
+        "tags": ["WA-JS"],
         "description": "",
+        "operationId": "getAllGroups",
         "parameters": [
           {
             "name": "session",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "NERDWHATS_AMERICA"
+              "type": "string"
             }
-          },
-          {
-            "name": "groupId",
-            "schema": {
-              "type": "string",
-              "example": "<groupId>"
-            },
-            "in": "query"
-          },
-          {
-            "name": "wid",
-            "schema": {
-              "type": "string",
-              "example": "5521999999999@c.us"
-            },
-            "in": "query"
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
           },
-          "400": {
-            "description": "Bad Request"
-          },
           "500": {
             "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "$groupId": {
-                    "type": "string"
-                  },
-                  "$path": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
+        "security": []
       }
     },
     "/api/{session}/group-members/{groupId}": {
@@ -2190,56 +2433,42 @@
     },
     "/api/{session}/create-group": {
       "post": {
-        "tags": ["Group"],
+        "tags": ["WA-JS"],
         "description": "",
+        "operationId": "createGroup",
         "parameters": [
           {
             "name": "session",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "NERDWHATS_AMERICA"
+              "type": "string"
             }
           }
         ],
         "responses": {
-          "201": {
-            "description": "Created"
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "500": {
             "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "participants": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
                   "name": {
-                    "type": "string"
-                  }
-                },
-                "required": ["participants", "name"]
-              },
-              "examples": {
-                "Default": {
-                  "value": {
-                    "participants": ["5521999999999"],
-                    "name": "Group name"
+                    "example": "any"
+                  },
+                  "participants": {
+                    "example": "any"
                   }
                 }
               }
@@ -2352,53 +2581,42 @@
     },
     "/api/{session}/add-participant-group": {
       "post": {
-        "tags": ["Group"],
+        "tags": ["WA-JS"],
         "description": "",
+        "operationId": "addParticipant",
         "parameters": [
           {
             "name": "session",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "NERDWHATS_AMERICA"
+              "type": "string"
             }
           }
         ],
         "responses": {
-          "201": {
-            "description": "Created"
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "500": {
             "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
                   "groupId": {
-                    "type": "string"
+                    "example": "any"
                   },
-                  "phone": {
-                    "type": "string"
-                  }
-                },
-                "required": ["groupId", "phone"]
-              },
-              "examples": {
-                "Default": {
-                  "value": {
-                    "groupId": "<groupId>",
-                    "phone": "5521999999999"
+                  "participantId": {
+                    "example": "any"
                   }
                 }
               }
@@ -2409,16 +2627,16 @@
     },
     "/api/{session}/remove-participant-group": {
       "post": {
-        "tags": ["Group"],
+        "tags": ["WA-JS"],
         "description": "",
+        "operationId": "removeParticipant",
         "parameters": [
           {
             "name": "session",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "NERDWHATS_AMERICA"
+              "type": "string"
             }
           }
         ],
@@ -2426,36 +2644,25 @@
           "200": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request"
+          },
           "500": {
             "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
                   "groupId": {
-                    "type": "string"
+                    "example": "any"
                   },
-                  "phone": {
-                    "type": "string"
-                  }
-                },
-                "required": ["groupId", "phone"]
-              },
-              "examples": {
-                "Default": {
-                  "value": {
-                    "groupId": "<groupId>",
-                    "phone": "5521999999999"
+                  "participantId": {
+                    "example": "any"
                   }
                 }
               }
@@ -2466,53 +2673,42 @@
     },
     "/api/{session}/promote-participant-group": {
       "post": {
-        "tags": ["Group"],
+        "tags": ["WA-JS"],
         "description": "",
+        "operationId": "promoteParticipant",
         "parameters": [
           {
             "name": "session",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "NERDWHATS_AMERICA"
+              "type": "string"
             }
           }
         ],
         "responses": {
-          "201": {
-            "description": "Created"
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "500": {
             "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
                   "groupId": {
-                    "type": "string"
+                    "example": "any"
                   },
-                  "phone": {
-                    "type": "string"
-                  }
-                },
-                "required": ["groupId", "phone"]
-              },
-              "examples": {
-                "Default": {
-                  "value": {
-                    "groupId": "<groupId>",
-                    "phone": "5521999999999"
+                  "participantId": {
+                    "example": "any"
                   }
                 }
               }
@@ -2523,53 +2719,42 @@
     },
     "/api/{session}/demote-participant-group": {
       "post": {
-        "tags": ["Group"],
+        "tags": ["WA-JS"],
         "description": "",
+        "operationId": "demoteParticipant",
         "parameters": [
           {
             "name": "session",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "NERDWHATS_AMERICA"
+              "type": "string"
             }
           }
         ],
         "responses": {
-          "201": {
-            "description": "Created"
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "500": {
             "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
                   "groupId": {
-                    "type": "string"
+                    "example": "any"
                   },
-                  "phone": {
-                    "type": "string"
-                  }
-                },
-                "required": ["groupId", "phone"]
-              },
-              "examples": {
-                "Default": {
-                  "value": {
-                    "groupId": "<groupId>",
-                    "phone": "5521999999999"
+                  "participantId": {
+                    "example": "any"
                   }
                 }
               }
@@ -2919,124 +3104,14 @@
     },
     "/api/{session}/all-chats": {
       "get": {
-        "tags": ["Chat"],
-        "summary": "Deprecated in favor of ",
-        "description": "This body is not required. Not sent body to get all chats or filter.",
+        "tags": ["WA-JS"],
+        "description": "",
+        "operationId": "listAllChats",
         "parameters": [
           {
             "name": "session",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "example": "NERDWHATS_AMERICA"
-            }
-          },
-          {
-            "name": "phone",
-            "schema": {
-              "type": "string",
-              "example": "5521999999999"
-            },
-            "in": "query"
-          },
-          {
-            "name": "isGroup",
-            "schema": {
-              "type": "string",
-              "example": "false"
-            },
-            "in": "query"
-          },
-          {
-            "name": "includeMe",
-            "schema": {
-              "type": "string",
-              "example": "true"
-            },
-            "in": "query"
-          },
-          {
-            "name": "includeNotifications",
-            "schema": {
-              "type": "string",
-              "example": "false"
-            },
-            "in": "query"
-          },
-          {
-            "name": "messageId",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "example": "<messageId>"
-            },
-            "in": "query"
-          },
-          {
-            "name": "obj",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "string",
-                  "example": "My new status"
-                }
-              },
-              "required": ["status"]
-            }
-          },
-          {
-            "name": "file",
-            "in": "formData",
-            "required": true,
-            "schema": {
-              "type": "file"
-            }
-          },
-          {
-            "name": "type",
-            "schema": {
-              "type": "string",
-              "example": "all"
-            },
-            "in": "query"
-          },
-          {
-            "name": "count",
-            "schema": {
-              "type": "string",
-              "example": "20"
-            },
-            "in": "query"
-          },
-          {
-            "name": "direction",
-            "schema": {
-              "type": "string",
-              "example": "before"
-            },
-            "in": "query"
-          },
-          {
-            "name": "id",
-            "schema": {
-              "type": "string",
-              "example": "<message_id_to_use_direction>"
-            },
-            "in": "query"
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "response",
-            "in": "query",
             "schema": {
               "type": "string"
             }
@@ -3046,63 +3121,25 @@
           "200": {
             "description": "OK"
           },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
           "500": {
             "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "event": {
-                    "type": "string"
-                  },
-                  "private": {
-                    "type": "string"
-                  }
-                }
-              },
-              "examples": {
-                "Default": {
-                  "value": {
-                    "messageId": "conversation_status_changed",
-                    "private": "false"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
+        "security": []
       }
     },
     "/api/{session}/list-chats": {
       "post": {
-        "tags": ["Chat"],
-        "summary": "Retrieve a list of chats",
-        "description": "This body is not required. Not sent body to get all chats or filter.",
+        "tags": ["WA-JS"],
+        "description": "",
+        "operationId": "listAllChats",
         "parameters": [
           {
             "name": "session",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "NERDWHATS_AMERICA"
+              "type": "string"
             }
           }
         ],
@@ -3114,77 +3151,31 @@
             "description": "Internal Server Error"
           }
         },
-        "security": [
+        "security": []
+      },
+      "get": {
+        "tags": ["WA-JS"],
+        "description": "",
+        "operationId": "listAllChats",
+        "parameters": [
           {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": false,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "count": {
-                    "type": "number"
-                  },
-                  "direction": {
-                    "type": "string"
-                  },
-                  "onlyGroups": {
-                    "type": "boolean"
-                  },
-                  "onlyUsers": {
-                    "type": "boolean"
-                  },
-                  "onlyWithUnreadMessage": {
-                    "type": "boolean"
-                  },
-                  "withLabels": {
-                    "type": "array"
-                  }
-                }
-              },
-              "examples": {
-                "All options - Edit this": {
-                  "value": {
-                    "id": "<chatId>",
-                    "count": 20,
-                    "direction": "after",
-                    "onlyGroups": false,
-                    "onlyUsers": false,
-                    "onlyWithUnreadMessage": false,
-                    "withLabels": []
-                  }
-                },
-                "All chats": {
-                  "value": {}
-                },
-                "Chats group": {
-                  "value": {
-                    "onlyGroups": true
-                  }
-                },
-                "Only with unread messages": {
-                  "value": {
-                    "onlyWithUnreadMessage": false
-                  }
-                },
-                "Paginated results": {
-                  "value": {
-                    "id": "<chatId>",
-                    "count": 20,
-                    "direction": "after"
-                  }
-                }
-              }
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           }
-        }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": []
       }
     },
     "/api/{session}/all-chats-archived": {
@@ -3375,16 +3366,16 @@
     },
     "/api/{session}/all-unread-messages": {
       "get": {
-        "tags": ["Chat"],
+        "tags": ["WA-JS"],
         "description": "",
+        "operationId": "getAllUnreadMessages",
         "parameters": [
           {
             "name": "session",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "NERDWHATS_AMERICA"
+              "type": "string"
             }
           }
         ],
@@ -3396,11 +3387,7 @@
             "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/{session}/chat-by-id/{phone}": {
@@ -3980,16 +3967,16 @@
     },
     "/api/{session}/delete-message": {
       "post": {
-        "tags": ["Messages"],
+        "tags": ["WA-JS"],
         "description": "",
+        "operationId": "deleteMessage",
         "parameters": [
           {
             "name": "session",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "NERDWHATS_AMERICA"
+              "type": "string"
             }
           }
         ],
@@ -3997,62 +3984,15 @@
           "200": {
             "description": "OK"
           },
-          "401": {
-            "description": "Unauthorized"
+          "400": {
+            "description": "Bad Request"
           },
           "500": {
             "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": false,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "phone": {
-                    "type": "string"
-                  },
-                  "isGroup": {
-                    "type": "boolean"
-                  },
-                  "messageId": {
-                    "type": "string"
-                  },
-                  "onlyLocal": {
-                    "type": "boolean"
-                  },
-                  "deleteMediaInDevice": {
-                    "type": "boolean"
-                  }
-                }
-              },
-              "examples": {
-                "Delete message to all": {
-                  "value": {
-                    "phone": "5521999999999",
-                    "isGroup": false,
-                    "messageId": "<messageId>",
-                    "deleteMediaInDevice": true
-                  }
-                },
-                "Delete message only me": {
-                  "value": {
-                    "phone": "5521999999999",
-                    "isGroup": false,
-                    "messageId": "<messageId>"
-                  }
-                }
-              }
-            }
-          }
-        }
+        "security": [],
+        "requestBody": {}
       }
     },
     "/api/{session}/react-message": {
@@ -6309,7 +6249,9 @@
     },
     "/api/{session}/all-contacts": {
       "get": {
+        "tags": ["WA-JS"],
         "description": "",
+        "operationId": "getAllContacts",
         "parameters": [
           {
             "name": "session",
@@ -6321,37 +6263,6 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/{session}/contact/{phone}": {
-      "get": {
-        "tags": ["Chat"],
-        "description": "",
-        "parameters": [
-          {
-            "name": "session",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "example": "NERDWHATS_AMERICA"
-            }
-          },
-          {
-            "name": "phone",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "example": "5521999999999"
-            }
-          }
-        ],
-        "responses": {
           "200": {
             "description": "OK"
           },
@@ -6359,11 +6270,44 @@
             "description": "Internal Server Error"
           }
         },
-        "security": [
+        "security": []
+      }
+    },
+    "/api/{session}/contact/{phone}": {
+      "get": {
+        "tags": ["WA-JS"],
+        "description": "",
+        "operationId": "getContactDetailsByPhone",
+        "parameters": [
           {
-            "bearerAuth": []
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "phone",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": []
       }
     },
     "/api/{session}/profile/{phone}": {
@@ -6523,16 +6467,16 @@
     },
     "/api/{session}/block-contact": {
       "post": {
-        "tags": ["Misc"],
+        "tags": ["WA-JS"],
         "description": "",
+        "operationId": "blockContact",
         "parameters": [
           {
             "name": "session",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "NERDWHATS_AMERICA"
+              "type": "string"
             }
           }
         ],
@@ -6540,35 +6484,22 @@
           "200": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request"
+          },
           "500": {
             "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "phone": {
-                    "type": "string"
-                  },
-                  "isGroup": {
-                    "type": "boolean"
-                  }
-                }
-              },
-              "examples": {
-                "Default": {
-                  "value": {
-                    "phone": "5521999999999",
-                    "isGroup": false
+                  "contactId": {
+                    "example": "any"
                   }
                 }
               }
@@ -6579,16 +6510,16 @@
     },
     "/api/{session}/unblock-contact": {
       "post": {
-        "tags": ["Misc"],
+        "tags": ["WA-JS"],
         "description": "",
+        "operationId": "unblockContact",
         "parameters": [
           {
             "name": "session",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "NERDWHATS_AMERICA"
+              "type": "string"
             }
           }
         ],
@@ -6596,35 +6527,22 @@
           "200": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request"
+          },
           "500": {
             "description": "Internal Server Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "phone": {
-                    "type": "string"
-                  },
-                  "isGroup": {
-                    "type": "boolean"
-                  }
-                }
-              },
-              "examples": {
-                "Default": {
-                  "value": {
-                    "phone": "5521999999999",
-                    "isGroup": false
+                  "contactId": {
+                    "example": "any"
                   }
                 }
               }
@@ -7168,6 +7086,9 @@
           "200": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -7197,6 +7118,9 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "500": {
             "description": "Internal Server Error"
@@ -7890,6 +7814,36 @@
         }
       }
     },
+    "/api/{session}/generate-link-device-code": {
+      "post": {
+        "tags": ["WA-JS"],
+        "description": "",
+        "operationId": "generateLinkDeviceCode",
+        "parameters": [
+          {
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [],
+        "requestBody": {}
+      }
+    },
     "/api-docs": {
       "get": {
         "description": "",
@@ -7933,66 +7887,245 @@
         }
       }
     },
-    "/api/{session}/generate-link-device-code": {
-      "post": {
-        "tags": ["Device"],
-        "summary": "Gera código de link de dispositivo para autenticação sem QR Code",
-        "description": "Gera um código de autenticação para adicionar o WhatsApp em outro dispositivo usando apenas o número de telefone.",
-        "operationId": "generateDeviceLinkCode",
+    "/api/sessions": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/sessions/{session}": {
+      "delete": {
+        "description": "",
         "parameters": [
           {
             "name": "session",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "mySession"
+              "type": "string"
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/{session}/get-chat": {
+      "get": {
+        "tags": ["WA-JS"],
+        "description": "",
+        "operationId": "getChatDetails",
+        "parameters": [
+          {
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "*",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/{session}/get-contact": {
+      "get": {
+        "tags": ["WA-JS"],
+        "description": "",
+        "operationId": "getContactDetails",
+        "parameters": [
+          {
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contactId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/{session}/clean-session": {
+      "post": {
+        "tags": ["WA-JS"],
+        "description": "",
+        "operationId": "cleanSession",
+        "parameters": [
+          {
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/{session}/execute-script": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "phone": { "type": "string", "example": "5511999999999" },
-                  "sendPushNotification": { "type": "boolean", "example": true }
-                },
-                "required": ["phone"]
-              },
-              "example": {
-                "phone": "5511999999999",
-                "sendPushNotification": true
+                  "script": {
+                    "example": "any"
+                  },
+                  "args": {
+                    "example": "any"
+                  }
+                }
               }
             }
           }
-        },
+        }
+      }
+    },
+    "/api/{session}/get-auth-code": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Código de link gerado com sucesso",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "string",
-                      "example": "SEU_CODIGO_DE_LINK"
-                    }
-                  }
-                },
-                "example": { "code": "SEU_CODIGO_DE_LINK" }
-              }
-            }
+            "description": "OK"
           },
-          "400": {
-            "description": "Sessão não inicializada ou método não disponível."
+          "404": {
+            "description": "Not Found"
           },
-          "500": { "description": "Erro interno" }
-        },
-        "security": [{ "bearerAuth": [] }]
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
       }
     }
   },
@@ -8010,5 +8143,10 @@
         "bearerFormat": "JWT"
       }
     }
-  }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
 }
